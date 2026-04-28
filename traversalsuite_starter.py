@@ -46,8 +46,36 @@ def num_islands_dfs(grid):
         * single row or single column
     """
     # TODO: Write your solution here.
-    print("num_islands_dfs received:", grid)
-    return 0
+    #Check if the grid is empty
+    if grid == False:
+        return 0
+    # Number of islands (groups of connected 1's)
+    islands = 0
+    # Number of rows and columns
+    rows, columns = len(grid), len(grid[0])
+
+    def DFS (row, column):
+        
+        if row < 0 or row >= len(grid) or column < 0 or column >= len(grid[0]) or grid[row][column] == '0':
+            return 
+        grid[r][c] = '0'
+
+        DFS(r + 1, c)
+        DFS(r - 1, c)
+        DFS(r, c + 1)
+        DFS(r, c - 1)
+    
+    for row in range(rows):
+        for column in range(columns):
+            if grid[row][column] == '1':
+                islands +=1
+                DFS(row, column)
+    return islands
+    
+
+
+#print("num_islands_dfs received:", grid)
+#return 0
 
 
 def num_islands_bfs(grid):
@@ -67,6 +95,7 @@ def num_islands_bfs(grid):
     - You must solve this version using BFS.
     """
     # TODO: Write your solution here.
+    
     print("num_islands_bfs received:", grid)
     return 0
 
