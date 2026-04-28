@@ -11,7 +11,7 @@ Instructions:
 
 You may add helper functions if needed.
 """
-
+from collections import deque
 
 class TreeNode:
     """
@@ -53,17 +53,18 @@ def num_islands_dfs(grid):
     islands = 0
     # Number of rows and columns
     rows, columns = len(grid), len(grid[0])
+  
 
     def DFS (row, column):
         
         if row < 0 or row >= len(grid) or column < 0 or column >= len(grid[0]) or grid[row][column] == '0':
             return 
-        grid[r][c] = '0'
+        grid[row][column] = '0'
 
-        DFS(r + 1, c)
-        DFS(r - 1, c)
-        DFS(r, c + 1)
-        DFS(r, c - 1)
+        DFS(row + 1, column)
+        DFS(row - 1, column)
+        DFS(row, column + 1)
+        DFS(row, column - 1)
     
     for row in range(rows):
         for column in range(columns):
@@ -95,9 +96,41 @@ def num_islands_bfs(grid):
     - You must solve this version using BFS.
     """
     # TODO: Write your solution here.
-    
+    #Check if the grid is empty
+    if not grid or not grid[0]: 
+        return 0
+    # Number of islands (groups of connected 1's)
+    islands = 0
+    # Number of rows and columns
+    rows, columns = len(grid), len(grid[0])
+    # The visited placeholder
+    visited = set()
+
+    for row in range(rows):
+        for column in range(columns):
+            # If at row x column, the value 1 island is found, and it is not in visited, increase islands by 1
+            if grid[row][column] == '1' and (row,column) not in visited:
+                islands+= 1
+                queue = deque([(row,column)])
+                visited.add((row,column))
+                while queue:
+                    # Assign the first item in queue to row and column
+                    curr_row, curr_column = queue.popleft()
+                    # Now, check for the 4 neighbors of down, up, right and left
+                    for d_row, d_column in [(1,0), (-1,0), (0, 1), (0, -1)]:
+                        n_row, n_column = curr_row + d_row, curr_column + d_column
+                        # Check for boundaries, that grid at n_row and n_column is 1, and that it has not been visited.
+                        if( 0 <= n_row < rows and 0 <= n_column < columns and grid[n_row][n_column] == '1' and (n_row, n_column) not in visited):
+                            # If it has not already been visited, add that to the queue
+                            queue.append((n_row, n_column))
+                            # Add it to the visted
+                            visited.add((n_row, n_column))
     print("num_islands_bfs received:", grid)
-    return 0
+    # Return isolated neighboring group of 1's
+    return islands
+
+    #print("num_islands_bfs received:", grid)
+    #return 0
 
 
 def is_symmetric(root):
@@ -121,9 +154,29 @@ def is_symmetric(root):
         * missing children
     """
     # TODO: Write your solution here.
-    print("is_symmetric received root with value:",
-          root.val if root is not None else None)
-    return False
+    if not root:
+        return True
+
+    def dfs(l_tree, r_tree):
+        # If left and right subtree are non existent, then the tree is symmetric
+        if( not l_tree and not r_tree):
+            return True
+        # If only one of the subrees is non existent, then the tree is no longer symmetric
+        if(not l_tree or not r_tree):
+            return False
+        # If the left subtree value is not equal to right subtree value, then it is not symmetric
+        if(l_tree.val != r_tree.val):
+            return False
+        # Compare left tree's left with right tree's right
+        return  dfs(l_tree.left, r_tree.right) and dfs(l_tree.right, r_tree.left)
+    
+    return dfs(root.left, root.right)
+
+
+    
+    #print("is_symmetric received root with value:",
+    #      root.val if root is not None else None)
+    #return False
 
 
 def can_finish_dfs(num_courses, prerequisites):
@@ -148,6 +201,37 @@ def can_finish_dfs(num_courses, prerequisites):
     - Otherwise, return True.
     """
     # TODO: Write your solution here.
+    adj_list = [[] for _ in range(num_courses)]
+    # the first dimension being the class, the second dimesnion being the pre-requisite
+    for course, pre in prerequisites:
+        adj_list[pre].append(course)
+    # Create a list of status for each course. 0 as unvisited, 1 as currently being visited, 2 as visited
+    state = [0] * num_courses
+    def has_cycle(node):
+        # If the node/class is being visited, return true
+        if state[node] == 1:
+            return True
+        # If the node/class has already been visited, return false
+        if state[node] == 2:
+            return False
+        # Mark the current node/class as being visited
+        state[node] = 1 
+        # For each neighboor in the adjancency list, if it has a cycle, if the neighbor has a cycle, return true
+        for neighbor in adj_list[node]:
+            if has_cycle(neighbor):
+                return True
+        # otherwise, mark it as visited and return false
+        state[node] = 2
+        return False
+    # For each course that has not been visited, do the following...
+    for i in range(num_courses):
+        if state[i] == 0:
+            # If a cycle is detected, return dalse since not all courses can be finished
+            if has_cycle(i):
+                return False
+    # Return true if no cycle has been detected.
+      
+    return True
     print("can_finish_dfs received:", num_courses, prerequisites)
     return False
 
@@ -174,6 +258,43 @@ def course_order_bfs(num_courses, prerequisites):
     - If multiple valid answers exist, any valid order is acceptable.
     """
     # TODO: Write your solution here.
+    # An adjacency list for the courses and their dependents
+    adj_list = [[] for _ in range(num_courses)]
+    # in degree list to track number of requiremnets for courses
+    in_degree = [0] * num_courses
+
+    for course, pre in prerequisites:
+        # Assign all courses that depend on the prerequisite
+        adj_list[pre].append(course)
+        # increment the indegree since the course has a requirement
+        in_degree[course] += 1
+    # Initialize a queue for courses with no in_degrees/prerequisites
+    queue = deque()
+    for i in range(num_courses):
+        if(in_degree[i] == 0):
+            queue.append(i)
+    # Create the set to order the courses
+    order = []
+    
+    while queue:
+        # Assign the no prerequisite course in the queue
+        current = queue.popleft()
+        order.append(current)
+        # For each course that the current course is a prerequisite to
+        for neighbor in adj_list[current]:
+            # Subtract the indegree since the prerequisite has now been met
+            in_degree[neighbor] -= 1
+            # If now the neighbor has no outsanding prerequisites
+            if in_degree[neighbor] == 0:
+                # Add that to the queue as the new no prerequiste course
+                queue.append(neighbor)
+    # If the number of courses ordered in the set are equal to all courses...
+    if len(order) == num_courses:
+        # Then there is no cycle and an order is returned
+        return order
+    # Otherwise, there is a cycle and cannot be ordered is such way that classes can be finished.
+    return []
+
     print("course_order_bfs received:", num_courses, prerequisites)
     return []
 
@@ -286,37 +407,36 @@ def main():
     # -----------------------------------
     num_courses = 4
     prerequisites = [[1, 0], [2, 0], [3, 1], [3, 2]]
-
     print("Testing Course Schedule")
     print("Can finish (DFS cycle detection):",
           can_finish_dfs(num_courses, prerequisites))
     print("Course order (BFS topological sort):",
           course_order_bfs(num_courses, prerequisites))
     print()
-
-    # -----------------------------------
-    # Problem 4: N-Queens
-    # -----------------------------------
-    n = 4
-    solutions = solve_n_queens(n)
-
-    print("Testing N-Queens")
-    print("Solutions returned:", solutions)
-    print()
-
-    # -----------------------------------
-    # Problem 5: Graph Coloring
-    # -----------------------------------
-    graph = {
-        0: [1, 2],
-        1: [0, 2],
-        2: [0, 1]
-    }
-    m = 3
-
-    print("Testing Graph Coloring")
-    print("Coloring possible:", graph_coloring(graph, m))
-    print()
+#
+    ## -----------------------------------
+    ## Problem 4: N-Queens
+    ## -----------------------------------
+    #n = 4
+    #solutions = solve_n_queens(n)
+#
+    #print("Testing N-Queens")
+    #print("Solutions returned:", solutions)
+    #print()
+#
+    ## -----------------------------------
+    ## Problem 5: Graph Coloring
+    ## -----------------------------------
+    #graph = {
+    #    0: [1, 2],
+    #    1: [0, 2],
+    #    2: [0, 1]
+    #}
+    #m = 3
+#
+    #print("Testing Graph Coloring")
+    #print("Coloring possible:", graph_coloring(graph, m))
+    #print()
 
 
 if __name__ == "__main__":
