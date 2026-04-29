@@ -47,19 +47,21 @@ def num_islands_dfs(grid):
     """
     # TODO: Write your solution here.
     #Check if the grid is empty
-    if grid == False:
+    if not grid or not grid[0]:
         return 0
     # Number of islands (groups of connected 1's)
     islands = 0
     # Number of rows and columns
     rows, columns = len(grid), len(grid[0])
   
+    # set to keep track of nodes visited
+    visited = set()
 
     def DFS (row, column):
         
-        if row < 0 or row >= len(grid) or column < 0 or column >= len(grid[0]) or grid[row][column] == '0':
+        if (row < 0 or row >= rows or column < 0 or column >= columns or grid[row][column] == '0' or (row, column) in visited):
             return 
-        grid[row][column] = '0'
+        visited.add((row, column))
 
         DFS(row + 1, column)
         DFS(row - 1, column)
@@ -68,7 +70,7 @@ def num_islands_dfs(grid):
     
     for row in range(rows):
         for column in range(columns):
-            if grid[row][column] == '1':
+            if grid[row][column] == '1' and (row, column) not in visited:
                 islands +=1
                 DFS(row, column)
     return islands
@@ -125,12 +127,9 @@ def num_islands_bfs(grid):
                             queue.append((n_row, n_column))
                             # Add it to the visted
                             visited.add((n_row, n_column))
-    print("num_islands_bfs received:", grid)
     # Return isolated neighboring group of 1's
     return islands
 
-    #print("num_islands_bfs received:", grid)
-    #return 0
 
 
 def is_symmetric(root):
@@ -173,11 +172,6 @@ def is_symmetric(root):
     return dfs(root.left, root.right)
 
 
-    
-    #print("is_symmetric received root with value:",
-    #      root.val if root is not None else None)
-    #return False
-
 
 def can_finish_dfs(num_courses, prerequisites):
     """
@@ -202,7 +196,7 @@ def can_finish_dfs(num_courses, prerequisites):
     """
     # TODO: Write your solution here.
     adj_list = [[] for _ in range(num_courses)]
-    # the first dimension being the class, the second dimesnion being the pre-requisite
+    # Mapping the prerequisite to its dependents.
     for course, pre in prerequisites:
         adj_list[pre].append(course)
     # Create a list of status for each course. 0 as unvisited, 1 as currently being visited, 2 as visited
@@ -230,10 +224,8 @@ def can_finish_dfs(num_courses, prerequisites):
             if has_cycle(i):
                 return False
     # Return true if no cycle has been detected.
-      
     return True
-    print("can_finish_dfs received:", num_courses, prerequisites)
-    return False
+
 
 
 def course_order_bfs(num_courses, prerequisites):
@@ -293,9 +285,6 @@ def course_order_bfs(num_courses, prerequisites):
         # Then there is no cycle and an order is returned
         return order
     # Otherwise, there is a cycle and cannot be ordered is such way that classes can be finished.
-    return []
-
-    print("course_order_bfs received:", num_courses, prerequisites)
     return []
 
 
@@ -366,8 +355,7 @@ def solve_n_queens(n):
     backtrack(0)
     return res
 
-    print("solve_n_queens received:", n)
-    return []
+
 
 
 def graph_coloring(graph, m):
@@ -434,10 +422,6 @@ def graph_coloring(graph, m):
     
     return backtrack(0)
 
-
-
-    print("graph_coloring received:", graph, m)
-    return False
 
 
 def main():
