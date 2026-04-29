@@ -329,7 +329,7 @@ def solve_n_queens(n):
         * n = 3
     """
     # TODO: Write your solution here.
-    col = set()
+    column = set()
     # Diagnoal from bottom left, to top right
     posDiag = set() # (r + c)
     # Diagonal from top left, to bottom right
@@ -345,11 +345,11 @@ def solve_n_queens(n):
             return
 
         for c in range(n):
-            if c in col or (r + c) in posDiag or (r - c) in negDiag:
+            if c in column or (r + c) in posDiag or (r - c) in negDiag:
                 continue
 
             # Update sets and board
-            col.add(c)
+            column.add(c)
             posDiag.add(r + c)
             negDiag.add(r - c)
             board[r][c] = "Q"
@@ -358,7 +358,7 @@ def solve_n_queens(n):
             backtrack(r + 1)
 
             # Undo (Backtrack)
-            col.remove(c)
+            column.remove(c)
             posDiag.remove(r + c)
             negDiag.remove(r - c)
             board[r][c] = "."
