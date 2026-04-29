@@ -329,6 +329,43 @@ def solve_n_queens(n):
         * n = 3
     """
     # TODO: Write your solution here.
+    col = set()
+    # Diagnoal from bottom left, to top right
+    posDiag = set() # (r + c)
+    # Diagonal from top left, to bottom right
+    negDiag = set() # (r - c)
+    # Resulting 
+    res = []
+    # Make a board of n places where the queen can be placed
+    board = [["."] * n for _ in range(n)]
+
+    def backtrack(r):
+        if r == n:
+            res.append(["".join(row) for row in board])
+            return
+
+        for c in range(n):
+            if c in col or (r + c) in posDiag or (r - c) in negDiag:
+                continue
+
+            # Update sets and board
+            col.add(c)
+            posDiag.add(r + c)
+            negDiag.add(r - c)
+            board[r][c] = "Q"
+
+            # Move to next row
+            backtrack(r + 1)
+
+            # Undo (Backtrack)
+            col.remove(c)
+            posDiag.remove(r + c)
+            negDiag.remove(r - c)
+            board[r][c] = "."
+
+    backtrack(0)
+    return res
+
     print("solve_n_queens received:", n)
     return []
 
@@ -413,27 +450,26 @@ def main():
     print("Course order (BFS topological sort):",
           course_order_bfs(num_courses, prerequisites))
     print()
-#
-    ## -----------------------------------
-    ## Problem 4: N-Queens
-    ## -----------------------------------
-    #n = 4
-    #solutions = solve_n_queens(n)
-#
-    #print("Testing N-Queens")
-    #print("Solutions returned:", solutions)
-    #print()
-#
-    ## -----------------------------------
-    ## Problem 5: Graph Coloring
-    ## -----------------------------------
-    #graph = {
-    #    0: [1, 2],
-    #    1: [0, 2],
-    #    2: [0, 1]
-    #}
-    #m = 3
-#
+
+    # -----------------------------------
+    # Problem 4: N-Queens
+    # -----------------------------------
+    n = 4
+    solutions = solve_n_queens(n) 
+    print("Testing N-Queens")
+    print("Solutions returned:", solutions)
+    print()
+
+   ## -----------------------------------
+   ## Problem 5: Graph Coloring
+   ## -----------------------------------
+   #graph = {
+   #    0: [1, 2],
+   #    1: [0, 2],
+   #    2: [0, 1]
+   #}
+   #m = 3
+
     #print("Testing Graph Coloring")
     #print("Coloring possible:", graph_coloring(graph, m))
     #print()
