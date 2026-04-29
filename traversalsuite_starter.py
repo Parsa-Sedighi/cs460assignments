@@ -339,29 +339,29 @@ def solve_n_queens(n):
     # Make a board of n places where the queen can be placed
     board = [["."] * n for _ in range(n)]
 
-    def backtrack(r):
-        if r == n:
+    def backtrack(row):
+        if row == n:
             res.append(["".join(row) for row in board])
             return
 
         for c in range(n):
-            if c in column or (r + c) in posDiag or (r - c) in negDiag:
+            if c in column or (row + c) in posDiag or (row - c) in negDiag:
                 continue
 
             # Update sets and board
             column.add(c)
-            posDiag.add(r + c)
-            negDiag.add(r - c)
-            board[r][c] = "Q"
+            posDiag.add(row + c)
+            negDiag.add(row - c)
+            board[row][c] = "Q"
 
             # Move to next row
-            backtrack(r + 1)
+            backtrack(row + 1)
 
             # Undo (Backtrack)
             column.remove(c)
-            posDiag.remove(r + c)
-            negDiag.remove(r - c)
-            board[r][c] = "."
+            posDiag.remove(row + c)
+            negDiag.remove(row - c)
+            board[row][c] = "."
 
     backtrack(0)
     return res
@@ -402,6 +402,40 @@ def graph_coloring(graph, m):
         * m = 1
     """
     # TODO: Write your solution here.
+    #If the graph is empty, we must return True
+    if not graph:
+        return True
+    # Create a color map and initialize all of them to color 0 = not colored
+    colors = {node: 0 for node in graph}
+    nodes = list(graph.keys())
+    # Number of nodes
+    nodes_count = len(nodes)
+    # A backtrack helper function to
+    def backtrack(index):
+        if index == nodes_count:
+            return True
+        current_node = nodes[index]
+
+        # For every color from 1 to m
+        for color_choice in range(1, m+1):
+            if is_safe(current_node, color_choice):
+                #Assign the color
+                colors[current_node] = color_choice
+
+                if backtrack(index+1):
+                    return True
+                colors[current_node] = 0
+        return False
+    def is_safe(node, color_to_try):
+        for neighbor in graph[node]:
+            if colors.get(neighbor, 0) == color_to_try:
+                return False
+        return True
+    
+    return backtrack(0)
+
+
+
     print("graph_coloring received:", graph, m)
     return False
 
@@ -460,19 +494,19 @@ def main():
     print("Solutions returned:", solutions)
     print()
 
-   ## -----------------------------------
-   ## Problem 5: Graph Coloring
-   ## -----------------------------------
-   #graph = {
-   #    0: [1, 2],
-   #    1: [0, 2],
-   #    2: [0, 1]
-   #}
-   #m = 3
+    # -----------------------------------
+    # Problem 5: Graph Coloring
+    # -----------------------------------
+    graph = {
+        0: [1, 2],
+        1: [0, 2],
+        2: [0, 1]
+    }
+    m = 3
 
-    #print("Testing Graph Coloring")
-    #print("Coloring possible:", graph_coloring(graph, m))
-    #print()
+    print("Testing Graph Coloring")
+    print("Coloring possible:", graph_coloring(graph, m))
+    print()
 
 
 if __name__ == "__main__":
